@@ -5,13 +5,22 @@ Educational cybersecurity simulation demonstrating two password attack methods f
 ## Quick Start - One Command Launch
 
 ```bash
-cd /home/pridesys/Desktop/extra/attack
+cd /home/pridesys/Desktop/extra/attack/project
 ./start.sh
 ```
 
 This launches **4 interactive terminals** for complete attack simulation:
-- Dictionary Attack Server + Client
-- Known Password Attack Server + Client
+- Dictionary Attack Server + Client (with packet-level analysis)
+- Known Password Attack Server + Client (with OSINT + packet-level analysis)
+
+### If Ports Are Busy
+
+If you see "Address already in use" errors:
+
+```bash
+./cleanup.sh    # Clean up any existing processes
+./start.sh      # Start fresh simulation
+```
 
 ## Attack Types
 

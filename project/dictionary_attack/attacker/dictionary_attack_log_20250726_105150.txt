@@ -1,0 +1,12 @@
+Dictionary Attack Log
+Target: 127.0.0.1:8080
+Username: admin
+Attack started: 2025-07-26 10:51:49
+Total attempts: 12
+Success: Yes
+Found password: secret
+
+==================================================
+Detailed Attempt Log:
+==================================================
+[2025-07-26 10:51:50] Attempt #12: admin:secret - SUCCESS (Response: 0.003s)
