@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # Dictionary Attack Simulation
+  dict-victim:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    container_name: dictionary-victim
+    hostname: dict-victim
+    networks:
+      dictionary-attack-net:
+        ipv4_address: 192.168.100.10
+    volumes:
+      - ../dictionary_attack:/attack
+    working_dir: /attack/victim
+    ports:
+      - "8080:8080"
+    command: tail -f /dev/null
+
+  dict-attacker:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    container_name: dictionary-attacker
+    hostname: dict-attacker
+    networks:
+      dictionary-attack-net:
+        ipv4_address: 192.168.100.20
+    volumes:
+      - ../dictionary_attack:/attack
+    working_dir: /attack/attacker
+    depends_on:
+      - dict-victim
+    command: tail -f /dev/null
+
+  # Known Password Attack Simulation  
+  known-victim:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    container_name: known-password-victim
+    hostname: known-victim
+    networks:
+      known-password-attack-net:
+        ipv4_address: 192.168.101.10
+    volumes:
+      - ../known_password_attack:/attack
+    working_dir: /attack/victim
+    ports:
+      - "8081:8081"
+    command: tail -f /dev/null
+
+  known-attacker:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    container_name: known-password-attacker
+    hostname: known-attacker
+    networks:
+      known-password-attack-net:
+        ipv4_address: 192.168.101.20
+    volumes:
+      - ../known_password_attack:/attack
+    working_dir: /attack/attacker
+    depends_on:
+      - known-victim
+    command: tail -f /dev/null
+
+networks:
+  dictionary-attack-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.100.0/24
+          gateway: 192.168.100.1
+
+  known-password-attack-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 192.168.101.0/24
+          gateway: 192.168.101.1

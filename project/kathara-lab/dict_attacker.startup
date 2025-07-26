@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Configure network interface
+ip addr add 192.168.100.20/24 dev eth0
+ip link set eth0 up
+ip route add default via 192.168.100.1
+
+# Install required packages
+apt-get update
+apt-get install -y python3 python3-pip
+
+# Create directory for attacker
+mkdir -p /opt/attacker
+cd /opt/attacker
+
+echo "Dictionary attacker configured at 192.168.100.20"
+echo "Target: 192.168.100.10:8080"
+echo "Run: python3 dictionary_attacker.py"
