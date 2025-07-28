@@ -1,0 +1,23 @@
+Dictionary Attack Log
+Target: 127.0.0.1:8080
+Username: admin
+Attack started: 2025-07-28 09:45:29
+Total attempts: 12
+Success: Yes
+Found password: secret
+
+==================================================
+Detailed Attempt Log:
+==================================================
+[2025-07-28 09:45:29] Attempt #1: admin:password - FAILED (Response: 0.003s)
+[2025-07-28 09:45:29] Attempt #2: admin:123456 - FAILED (Response: 0.003s)
+[2025-07-28 09:45:29] Attempt #3: admin:admin - FAILED (Response: 0.002s)
+[2025-07-28 09:45:30] Attempt #4: admin:letmein - FAILED (Response: 0.003s)
+[2025-07-28 09:45:30] Attempt #5: admin:welcome - FAILED (Response: 0.003s)
+[2025-07-28 09:45:30] Attempt #6: admin:password123 - FAILED (Response: 0.001s)
+[2025-07-28 09:45:30] Attempt #7: admin:admin123 - FAILED (Response: 0.003s)
+[2025-07-28 09:45:30] Attempt #8: admin:qwerty - FAILED (Response: 0.003s)
+[2025-07-28 09:45:30] Attempt #9: admin:abc123 - FAILED (Response: 0.003s)
+[2025-07-28 09:45:30] Attempt #10: admin:12345678 - FAILED (Response: 0.002s)
+[2025-07-28 09:45:30] Attempt #11: admin:password1 - FAILED (Response: 0.002s)
+[2025-07-28 09:45:31] Attempt #12: admin:secret - SUCCESS (Response: 0.003s)

