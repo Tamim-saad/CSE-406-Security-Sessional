@@ -11,7 +11,8 @@ This project implements and demonstrates two distinct password attack methodolog
 #### 1. Dictionary Attack
 - **Method**: High-volume brute force using common password dictionaries
 - **Implementation**: Raw socket packet construction with TCP/IP header analysis
-- **Target**: Port 8080 with generic user accounts
+- **Target**: Port 8080 with configurable admin account
+- **Configuration**: Dynamic password setting during server startup
 - **Detection Profile**: Easy to detect (high volume, many failed attempts)
 - **Speed**: Fast execution (100+ attempts/minute)
 - **Wordlist**: 5,530+ common passwords
@@ -19,10 +20,11 @@ This project implements and demonstrates two distinct password attack methodolog
 #### 2. Known Password Attack (OSINT-Based)
 - **Method**: Intelligence-driven targeted attack using personal information
 - **Implementation**: OSINT data collection with human-like behavior simulation
-- **Target**: Port 8081 with realistic user profiles
+- **Target**: Port 8081 focusing on John Smith profile
+- **Configuration**: Dynamic password setting with pattern analysis
 - **Detection Profile**: Difficult to detect (low volume, targeted attempts)
 - **Speed**: Slow, human-like timing (0.5-2.0s delays)
-- **Intelligence**: Personal data patterns (names, birth years, pets, locations)
+- **Intelligence**: John Smith's personal data (Born: 1985, Pet: Buddy, Hometown: Boston, Team: Patriots)
 
 ## Quick Start - One Command Launch
 
@@ -58,14 +60,16 @@ If you see "Address already in use" errors:
 - **Pattern generation**: 20+ password pattern algorithms based on personal data
 - **Stealth techniques**: Human-like timing and behavior patterns
 - **Intelligence analysis**: Pattern matching and success correlation
-- **Targeted profiles**: 5 realistic user accounts with personal information
+- **Focused Target**: John Smith profile with configurable password
 
 ### Victim Server Capabilities
+- **Dynamic Configuration**: On-the-fly password setting during server startup
 - **Multi-threaded handling**: Concurrent attack simulation support
 - **Real-time logging**: Live attack attempt monitoring
-- **Pattern analysis**: Detection of personal information usage in passwords
+- **Pattern analysis**: Detection of personal information usage in passwords (John Smith focus)
 - **Statistics tracking**: Comprehensive attack metrics and success rates
 - **Response simulation**: Realistic HTTP responses for success/failure
+- **Intelligence Display**: Shows target's personal information for OSINT simulation
 
 ## Attack Demonstration Results
 

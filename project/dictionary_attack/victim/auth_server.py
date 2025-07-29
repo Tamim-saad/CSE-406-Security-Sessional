@@ -20,17 +20,22 @@ class AuthServer:
         self.initialize_users()
         
     def initialize_users(self):
-        """Initialize user database with hashed passwords"""
-        # Default users for simulation
-        users = {
-            "admin": "secret",
-            "user": "password123", 
-            "test": "test123",
-            "root": "toor",
-            "guest": "guest"
-        }
+        """Initialize user database with dynamic password configuration"""
+        print("[*] Dictionary Attack Victim Server Configuration")
+        print("="*60)
         
-        for username, password in users.items():
+        # Get target configuration from user
+        try:
+            username = input("Enter target username (default: admin): ").strip()
+            if not username:
+                username = "admin"
+            
+            password = input(f"Enter password for {username}: ").strip()
+            if not password:
+                print("[!] Password cannot be empty!")
+                return self.initialize_users()
+            
+            # Create user account
             password_hash = hashlib.sha256(password.encode()).hexdigest()
             self.users_db[username] = {
                 "password_hash": password_hash,
@@ -38,11 +43,23 @@ class AuthServer:
                 "login_attempts": 0,
                 "successful_logins": 0
             }
-        
-        print(f"[*] Initialized {len(self.users_db)} users in database")
-        print("[*] Default credentials:")
-        for username, data in self.users_db.items():
-            print(f"    {username}:{data['plain_password']}")
+            
+            print(f"[*] User configured: {username}:{password}")
+            print(f"[*] Password hash: {password_hash[:16]}...")
+            
+        except (EOFError, KeyboardInterrupt):
+            # Fallback for automated environments
+            print("\n[*] Using default configuration for automated environment")
+            username = "admin"
+            password = "secret"
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
+            self.users_db[username] = {
+                "password_hash": password_hash,
+                "plain_password": password,
+                "login_attempts": 0,
+                "successful_logins": 0
+            }
+            print(f"[*] User configured: {username}:{password}")
     
     def hash_password(self, password):
         """Hash password using SHA-256"""

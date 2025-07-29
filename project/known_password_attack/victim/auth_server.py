@@ -19,98 +19,107 @@ class KnownPasswordAuthServer:
         self.initialize_user_profiles()
         
     def initialize_user_profiles(self):
-        """Initialize user database with realistic personal information-based passwords"""
-        # Realistic user profiles with personal information
-        user_profiles = {
-            "john.smith": {
-                "personal_info": {
-                    "full_name": "John Smith",
-                    "birth_year": "1985",
-                    "birth_date": "15031985",  # 15th March 1985
-                    "pet_name": "Buddy",
-                    "hometown": "Boston",
-                    "favorite_team": "Patriots",
-                    "company": "TechCorp"
-                },
-                "password": "John1985!",  # Name + birth year + special char
-                "password_pattern": "FirstName + BirthYear + Special"
-            },
-            "sarah.jones": {
-                "personal_info": {
-                    "full_name": "Sarah Jones", 
-                    "birth_year": "1992",
-                    "birth_date": "22081992",  # 22nd August 1992
-                    "pet_name": "Luna",
-                    "hometown": "Seattle",
-                    "favorite_team": "Seahawks",
-                    "company": "DataSoft"
-                },
-                "password": "Luna2024",  # Pet name + current year
-                "password_pattern": "PetName + CurrentYear"
-            },
-            "mike.johnson": {
-                "personal_info": {
-                    "full_name": "Michael Johnson",
-                    "birth_year": "1978",
-                    "birth_date": "10121978",  # 10th December 1978
-                    "pet_name": "Max",
-                    "hometown": "Chicago", 
-                    "favorite_team": "Bears",
-                    "company": "InfoTech"
-                },
-                "password": "Chicago78!",  # Hometown + birth year + special
-                "password_pattern": "Hometown + BirthYear + Special"
-            },
-            "anna.wilson": {
-                "personal_info": {
-                    "full_name": "Anna Wilson",
-                    "birth_year": "1990",
-                    "birth_date": "05071990",  # 5th July 1990
-                    "pet_name": "Bella",
-                    "hometown": "Denver",
-                    "favorite_team": "Broncos",
-                    "company": "CloudTech"
-                },
-                "password": "Bella@90",  # Pet + birth year suffix
-                "password_pattern": "PetName + BirthYear(suffix) + Special"
-            },
-            "david.brown": {
-                "personal_info": {
-                    "full_name": "David Brown",
-                    "birth_year": "1983",
-                    "birth_date": "18111983",  # 18th November 1983
-                    "pet_name": "Rocky",
-                    "hometown": "Miami",
-                    "favorite_team": "Dolphins",
-                    "company": "SecureTech"
-                },
-                "password": "Dolphins83",  # Favorite team + birth year
-                "password_pattern": "FavoriteTeam + BirthYear"
-            }
+        """Initialize John Smith profile with dynamic password configuration"""
+        print("[*] Known Password Attack Victim Server Configuration")
+        print("="*70)
+        
+        # John Smith's personal information (public/OSINT data)
+        john_smith_info = {
+            "full_name": "John Smith",
+            "first_name": "John",
+            "last_name": "Smith",
+            "birth_year": "1985",
+            "birth_date": "15031985",  # 15th March 1985
+            "age": "39",
+            "pet_name": "Buddy",
+            "hometown": "Boston",
+            "favorite_team": "Patriots",
+            "company": "TechCorp",
+            "interests": ["technology", "football", "gaming"]
         }
         
-        for username, profile in user_profiles.items():
-            password = profile["password"]
-            password_hash = hashlib.sha256(password.encode()).hexdigest()
+        print("Target Profile: John Smith (john.smith)")
+        print("Personal Information Available (OSINT):")
+        print(f"  Full Name: {john_smith_info['full_name']}")
+        print(f"  Birth Year: {john_smith_info['birth_year']} (Age: {john_smith_info['age']})")
+        print(f"  Pet Name: {john_smith_info['pet_name']}")
+        print(f"  Hometown: {john_smith_info['hometown']}")
+        print(f"  Favorite Team: {john_smith_info['favorite_team']}")
+        print(f"  Company: {john_smith_info['company']}")
+        print(f"  Interests: {', '.join(john_smith_info['interests'])}")
+        print()
+        
+        # Get password configuration from user
+        try:
+            password = input(f"Enter John Smith's password: ").strip()
+            if not password:
+                print("[!] Password cannot be empty!")
+                return self.initialize_user_profiles()
             
-            self.users_db[username] = {
+            # Analyze the password pattern
+            pattern = self.analyze_password_pattern(password, john_smith_info)
+            
+            # Create user account
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
+            self.users_db["john.smith"] = {
                 "password_hash": password_hash,
                 "plain_password": password,  # For simulation purposes only
-                "personal_info": profile["personal_info"],
-                "password_pattern": profile["password_pattern"],
+                "personal_info": john_smith_info,
+                "password_pattern": pattern,
                 "login_attempts": 0,
                 "successful_logins": 0
             }
+            
+            print(f"[*] Password configured for john.smith: {password}")
+            print(f"[*] Detected pattern: {pattern}")
+            print(f"[*] Password hash: {password_hash[:16]}...")
+            
+        except (EOFError, KeyboardInterrupt):
+            # Fallback for automated environments
+            print("\n[*] Using default configuration for automated environment")
+            password = "John1985!"
+            pattern = "FirstName + BirthYear + Special"
+            password_hash = hashlib.sha256(password.encode()).hexdigest()
+            self.users_db["john.smith"] = {
+                "password_hash": password_hash,
+                "plain_password": password,
+                "personal_info": john_smith_info,
+                "password_pattern": pattern,
+                "login_attempts": 0,
+                "successful_logins": 0
+            }
+            print(f"[*] Password configured for john.smith: {password}")
+            print(f"[*] Detected pattern: {pattern}")
+    
+    def analyze_password_pattern(self, password, personal_info):
+        """Analyze what personal information patterns the password contains"""
+        patterns = []
         
-        print(f"[*] Initialized {len(self.users_db)} user profiles for known password attack")
-        print("[*] User profiles and password patterns:")
-        for username, data in self.users_db.items():
-            print(f"    {username}:")
-            print(f"      Password: {data['plain_password']}")
-            print(f"      Pattern: {data['password_pattern']}")
-            print(f"      Personal Info: {data['personal_info']['full_name']}, Born: {data['personal_info']['birth_year']}")
-            print(f"      Pet: {data['personal_info']['pet_name']}, Hometown: {data['personal_info']['hometown']}")
-            print()
+        # Check for personal information in password
+        if personal_info['first_name'].lower() in password.lower():
+            patterns.append("FirstName")
+        if personal_info['last_name'].lower() in password.lower():
+            patterns.append("LastName")
+        if personal_info['birth_year'] in password:
+            patterns.append("BirthYear")
+        elif personal_info['birth_year'][-2:] in password:
+            patterns.append("BirthYear(short)")
+        if personal_info['pet_name'].lower() in password.lower():
+            patterns.append("PetName")
+        if personal_info['hometown'].lower() in password.lower():
+            patterns.append("Hometown")
+        if personal_info['favorite_team'].lower() in password.lower():
+            patterns.append("FavoriteTeam")
+        if personal_info['company'].lower() in password.lower():
+            patterns.append("Company")
+        if any(c in password for c in "!@#$*"):
+            patterns.append("Special")
+        if "2024" in password or "2025" in password:
+            patterns.append("CurrentYear")
+        if any(num in password for num in ["123", "1234", "12345"]):
+            patterns.append("CommonNumbers")
+        
+        return " + ".join(patterns) if patterns else "Unknown/Custom"
     
     def hash_password(self, password):
         """Hash password using SHA-256"""
