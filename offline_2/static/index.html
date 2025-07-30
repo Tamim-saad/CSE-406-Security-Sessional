@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Website Fingerprinting</title>
+
+    <!-- Minimal CSS framework -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+
+    <!-- Minimal reactive framework -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        body {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .results-table {
+            margin: 0 auto;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <main class="container" x-data="app()">
+        <h1>CSE406: Website Fingerprinting</h1>
+
+        <!-- Buttons -->
+        <div class="button-group">
+            <button @click="collectLatencyData()" :disabled="isCollecting">Collect Latency Data</button>
+            <button @click="collectTraceData()" :disabled="isCollecting">Collect Trace Data</button>
+            <button @click="downloadTraces()" :disabled="isCollecting">Download Traces</button>
+            <button @click="clearResults()" :disabled="isCollecting">Clear all results</button>
+        </div>
+
+        <!-- Status Display -->
+        <div x-show="status" role="alert" x-text="status"
+            :class="{'alert-success': !statusIsError, 'alert-error': statusIsError}">
+        </div>
+
+        <!-- Latency Table -->
+        <template x-if="latencyResults && !showingTraces">
+            <div class="results-container">
+                <h3>Latency Results</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>N</th>
+                            <th>Median Access Latency (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="(time, n) in latencyResults" :key="n">
+                            <tr>
+                                <td x-text="n"></td>
+                                <td x-text="time.toFixed(2)"></td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+        </template>
+
+        <!-- Heatmap Gallery -->
+        <template x-if="heatmaps && heatmaps.length">
+            <section style="margin-top: 2rem;">
+                <h3>Trace Heatmaps</h3>
+                <p>Trace data collected and visualized using matplotlib.</p>
+
+                <div style="display: flex; flex-direction: column; gap: 1rem;">
+                    <template x-for="heatmap in heatmaps" :key="heatmap.image_url">
+                        <div style="background: #111; padding: 0.5rem; border-radius: 8px;">
+                            <img :src="heatmap.image_url" alt="Heatmap"
+                                style="width: 100%; border: 4px solid #ccc; border-radius: 4px;" />
+
+                            <p style="font-size: 0.9rem; color: #ccc; text-align: center; margin-top: 0.25rem;">
+                                Min Sweeps: <span x-text="heatmap.min"></span>
+                                (<span x-text="(10 / heatmap.max).toFixed(2)"></span> ms/sweep),
+                                Max Sweeps: <span x-text="heatmap.max"></span>
+                                (<span x-text="(10 / heatmap.min).toFixed(2)"></span> ms/sweep),
+                                Range: <span x-text="heatmap.range"></span>,
+                                Samples: <span x-text="heatmap.samples"></span>
+                            </p>
+                        </div>
+                    </template>
+                </div>
+            </section>
+        </template>
+    </main>
+
+    <script src="index.js"></script>
+    <script>
+        // Load saved results on page load
+        document.addEventListener('alpine:init', () => {
+            window.Alpine.store('app').fetchResults?.();
+        });
+    </script>
+</body>
+
+</html>
